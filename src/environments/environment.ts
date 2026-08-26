@@ -3,7 +3,13 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+
+  // Para ionic serve
+  apiBrowserUrl: 'http://localhost:3000/api',
+
+  // Para el emulador oficial de Android Studio
+  apiAndroidUrl: 'http://10.0.2.2:3000/api'
 };
 
 /*
