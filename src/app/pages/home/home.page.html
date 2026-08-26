@@ -1,0 +1,37 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>IntelliPark</ion-title>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">Salir</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        Bienvenido, {{ user()?.user_first_name }}
+      </ion-card-title>
+
+      <ion-card-subtitle>
+        Operación del parqueadero
+      </ion-card-subtitle>
+    </ion-card-header>
+
+    <ion-card-content>
+      <ion-button
+        expand="block"
+        size="large"
+        (click)="showNextStep()"
+      >
+        Registrar vehículo
+      </ion-button>
+
+      @if (message()) {
+        <p>{{ message() }}</p>
+      }
+    </ion-card-content>
+  </ion-card>
+</ion-content>
