@@ -1,0 +1,52 @@
+ion-content {
+  --background:
+    linear-gradient(160deg, #102a43 0%, #1f6f8b 100%);
+}
+
+.login-container {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 20px 0;
+}
+
+ion-card {
+  width: min(100%, 420px);
+  border-radius: 24px;
+  padding: 12px;
+}
+
+ion-card-header {
+  text-align: center;
+}
+
+.brand {
+  width: 68px;
+  height: 68px;
+  margin: 0 auto 16px;
+  display: grid;
+  place-items: center;
+  border-radius: 20px;
+  background: var(--ion-color-primary);
+  color: white;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+ion-input {
+  margin-top: 14px;
+}
+
+.password-input {
+  margin-top: 20px;
+}
+
+ion-button {
+  margin-top: 24px;
+  --border-radius: 14px;
+}
+
+.login-error {
+  text-align: center;
+  margin: 16px 0 0;
+}
