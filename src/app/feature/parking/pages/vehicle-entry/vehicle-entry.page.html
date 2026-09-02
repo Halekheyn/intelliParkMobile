@@ -1,0 +1,208 @@
+<ion-header>
+  <ion-toolbar color="primary">
+
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+
+    <ion-title>Registrar ingreso</ion-title>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <div class="page-container">
+
+    <ion-card>
+
+      <ion-card-header>
+        <ion-card-title>
+          Ingreso de vehículo
+        </ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+
+        <p class="description">
+          Digite la placa y seleccione el tipo de vehículo.
+        </p>
+
+        <form
+          [formGroup]="checkInForm"
+          (ngSubmit)="registerEntry()"
+        >
+
+          <ion-list lines="full">
+
+            <ion-item>
+              <ion-input
+                class="plate-input"
+                type="text"
+                label="Placa del vehículo"
+                labelPlacement="stacked"
+                placeholder="ABC123"
+                formControlName="vehicle_plate"
+                autocomplete="off"
+                autocapitalize="characters"
+                [clearInput]="true"
+                [minlength]="5"
+                [maxlength]="15"
+              ></ion-input>
+            </ion-item>
+
+            @if (
+              plateControl.touched &&
+              plateControl.hasError('required')
+            ) {
+              <ion-note
+                color="danger"
+                class="validation-message"
+              >
+                La placa del vehículo es obligatoria.
+              </ion-note>
+            } @else if (
+              plateControl.touched &&
+              plateControl.hasError('minlength')
+            ) {
+              <ion-note
+                color="danger"
+                class="validation-message"
+              >
+                La placa debe tener mínimo 5 caracteres.
+              </ion-note>
+            } @else if (
+              plateControl.touched &&
+              plateControl.hasError('maxlength')
+            ) {
+              <ion-note
+                color="danger"
+                class="validation-message"
+              >
+                La placa debe tener máximo 15 caracteres.
+              </ion-note>
+            }
+
+            <ion-item>
+              <ion-select
+                label="Tipo de vehículo"
+                labelPlacement="stacked"
+                interface="action-sheet"
+                formControlName="vehicle_type"
+              >
+                <ion-select-option value="carro">
+                  Carro
+                </ion-select-option>
+
+                <ion-select-option value="moto">
+                  Moto
+                </ion-select-option>
+              </ion-select>
+            </ion-item>
+
+          </ion-list>
+
+          <ion-button
+            class="submit-button"
+            type="submit"
+            expand="block"
+            size="large"
+            [disabled]="checkInForm.invalid || isSubmitting()"
+          >
+
+            @if (isSubmitting()) {
+              <span class="button-content">
+                <ion-spinner name="crescent"></ion-spinner>
+                Registrando...
+              </span>
+            } @else {
+              Registrar ingreso
+            }
+
+          </ion-button>
+
+        </form>
+
+      </ion-card-content>
+
+    </ion-card>
+
+    @if (errorMessage()) {
+
+      <ion-card
+        class="feedback-card error-card"
+        role="alert"
+      >
+        <ion-card-header>
+          <ion-card-title>
+            No fue posible registrar
+          </ion-card-title>
+        </ion-card-header>
+
+        <ion-card-content>
+          {{ errorMessage() }}
+        </ion-card-content>
+      </ion-card>
+
+    }
+
+    @if (registeredEntry(); as entry) {
+
+      <ion-card
+        class="feedback-card success-card"
+        role="status"
+      >
+
+        <ion-card-header>
+          <ion-card-title>
+            Ingreso registrado
+          </ion-card-title>
+        </ion-card-header>
+
+        <ion-card-content>
+
+          <p class="success-message">
+            {{ successMessage() }}
+          </p>
+
+          <div class="result-grid">
+
+            <div class="result-item">
+              <span>Placa</span>
+              <strong class="registered-plate">
+                {{ entry.vehicle_plate  }}
+              </strong>
+            </div>
+
+            <div class="result-item">
+              <span>Tipo</span>
+              <strong>
+                {{ entry.vehicle_type  }}
+              </strong>
+            </div>
+
+            <div class="result-item">
+              <span>Hora de entrada</span>
+              <strong>
+                {{ entry.parking_entry_time | date:'dd/MM/yyyy, h:mm a' }}
+              </strong>
+            </div>
+
+            <div class="result-item">
+              <span>Estado</span>
+              <strong>
+                {{ entry.parking_status  }}
+              </strong>
+            </div>
+
+          </div>
+
+        </ion-card-content>
+
+      </ion-card>
+
+    }
+
+  </div>
+
+</ion-content>

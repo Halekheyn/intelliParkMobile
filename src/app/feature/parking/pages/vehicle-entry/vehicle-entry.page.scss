@@ -1,0 +1,88 @@
+.page-container {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.description {
+  margin-top: 0;
+  color: var(--ion-color-medium);
+}
+
+.plate-input {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.15rem;
+  text-transform: uppercase;
+}
+
+.validation-message {
+  display: block;
+  margin: 6px 16px 12px;
+}
+
+.submit-button {
+  margin-top: 24px;
+}
+
+.button-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.button-content ion-spinner {
+  width: 20px;
+  height: 20px;
+}
+
+.feedback-card {
+  margin-top: 20px;
+}
+
+.error-card {
+  border-left: 5px solid var(--ion-color-danger);
+}
+
+.success-card {
+  border-left: 5px solid var(--ion-color-success);
+}
+
+.success-message {
+  margin-top: 0;
+  color: var(--ion-color-success-shade);
+  font-weight: 600;
+}
+
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.result-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.result-item span {
+  color: var(--ion-color-medium);
+  font-size: 0.85rem;
+}
+
+.result-item strong {
+  text-transform: capitalize;
+}
+
+.registered-plate {
+  font-size: 1.4rem;
+  letter-spacing: 0.12rem;
+}
+
+@media (max-width: 420px) {
+  .result-grid {
+    grid-template-columns: 1fr;
+  }
+}
