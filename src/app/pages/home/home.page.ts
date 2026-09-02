@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+
 import {
   IonButton,
   IonButtons,
@@ -23,6 +24,7 @@ import { AuthUser } from '../../core/auth/auth.interface';
   styleUrls: ['home.page.scss'],
   standalone: true,
   imports: [
+    RouterLink,
     IonButton,
     IonButtons,
     IonCard,
@@ -38,24 +40,20 @@ import { AuthUser } from '../../core/auth/auth.interface';
 })
 export class HomePage {
 
-  private readonly _authService = inject(AuthService);
+  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
   readonly user = signal<AuthUser | null>(null);
-  readonly message = signal('');
 
   async ionViewWillEnter(): Promise<void> {
-    this.user.set(await this._authService.getStoredUser());
-  }
-
-  showNextStep(): void {
-    this.message.set(
-      'La captura y lectura de la placa se implementará en la siguiente sesión.'
+    this.user.set(
+      await this.authService.getStoredUser()
     );
   }
 
   async logout(): Promise<void> {
-    await this._authService.logout();
+
+    await this.authService.logout();
 
     await this.router.navigateByUrl('/login', {
       replaceUrl: true
