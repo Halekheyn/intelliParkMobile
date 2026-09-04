@@ -10,6 +10,8 @@ import {
   ApiResponse,
   CheckInRequest,
   ParkingRecord,
+  PlateRecognitionRequest,
+  PlateRecognitionResult,
   VehicleType
 } from '../interfaces/parking.interface';
 
@@ -41,6 +43,16 @@ export class ParkingService {
     Capacitor.getPlatform() === 'android'
       ? environment.apiAndroidUrl
       : environment.apiBrowserUrl;
+
+  recognizePlate(
+    payload: PlateRecognitionRequest
+  ): Observable<ApiResponse<PlateRecognitionResult>> {
+
+    return this.httpClient.post<ApiResponse<PlateRecognitionResult>>(
+      `${this.apiBaseUrl}/parking/recognize-plate`,
+      payload
+    );
+  }
 
   checkIn(
     payload: CheckInRequest

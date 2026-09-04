@@ -1,4 +1,8 @@
 export type VehicleType = 'carro' | 'moto';
+export type SupportedImageMimeType =
+  | 'image/jpeg'
+  | 'image/png'
+  | 'image/webp';
 
 /**
  * Información que la aplicación móvil envía a la API.
@@ -6,6 +10,21 @@ export type VehicleType = 'carro' | 'moto';
 export interface CheckInRequest {
   vehicle_plate: string;
   vehicle_type: VehicleType;
+}
+
+/**
+ * Imagen que se envía temporalmente al backend para reconocer la placa.
+ */
+export interface PlateRecognitionRequest {
+  image_base64: string;
+  mime_type: SupportedImageMimeType;
+}
+
+/**
+ * Resultado retornado por Gemini a través del backend.
+ */
+export interface PlateRecognitionResult {
+  vehicle_plate: string;
 }
 
 /**
