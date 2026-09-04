@@ -17,6 +17,12 @@ import {
 import { finalize } from 'rxjs';
 
 import {
+  Camera,
+  CameraResultType,
+  CameraSource
+} from '@capacitor/camera';
+
+import {
   IonBackButton,
   IonButton,
   IonButtons,
@@ -41,6 +47,8 @@ import {
   ApiErrorResponse,
   CheckInRequest,
   ParkingRecord,
+  PlateRecognitionRequest,
+  SupportedImageMimeType,
   VehicleType
 } from '../../interfaces/parking.interface';
 
@@ -81,9 +89,18 @@ export class VehicleEntryPage {
   private readonly parkingService = inject(ParkingService);
 
   readonly isSubmitting = signal(false);
+  readonly isTakingPhoto = signal(false);
+  readonly isRecognizingPlate = signal(false);
+
   readonly successMessage = signal('');
   readonly errorMessage = signal('');
+  readonly recognitionMessage = signal('');
+  readonly plateImagePreview = signal('');
+
   readonly registeredEntry = signal<ParkingRecord | null>(null);
+
+  private imageBase64 = '';
+  private imageMimeType: SupportedImageMimeType = 'image/jpeg';
 
   /**
    * Formulario para registrar el ingreso.
@@ -110,6 +127,110 @@ export class VehicleEntryPage {
    */
   get plateControl() {
     return this.checkInForm.controls.vehicle_plate;
+  }
+
+  /**
+   * Abre la cámara del dispositivo y conserva la fotografía en memoria.
+   */
+  async takePlatePhoto(): Promise<void> {
+    if (
+      this.isTakingPhoto() ||
+      this.isRecognizingPlate() ||
+      this.isSubmitting()
+    ) {
+      return;
+    }
+
+    this.errorMessage.set('');
+    this.recognitionMessage.set('');
+    this.isTakingPhoto.set(true);
+
+    try {
+      const photo = await Camera.getPhoto({
+        source: CameraSource.Camera,
+        resultType: CameraResultType.Base64,
+        quality: 75,
+        width: 1600,
+        allowEditing: false,
+        correctOrientation: true,
+        saveToGallery: false,
+        webUseInput: true,
+        promptLabelHeader: 'Fotografía de la placa',
+        promptLabelPhoto: 'Tomar fotografía',
+        promptLabelCancel: 'Cancelar'
+      });
+
+      if (!photo.base64String) {
+        throw new Error('La cámara no retornó una imagen válida.');
+      }
+
+      this.imageMimeType = this.getImageMimeType(photo.format);
+      this.imageBase64 = photo.base64String;
+
+      this.plateImagePreview.set(
+        `data:${this.imageMimeType};base64,${this.imageBase64}`
+      );
+    } catch (error) {
+      if (!this.wasCameraCancelled(error)) {
+        this.errorMessage.set(
+          'No fue posible tomar la fotografía de la placa.'
+        );
+      }
+    } finally {
+      this.isTakingPhoto.set(false);
+    }
+  }
+
+  /**
+   * Envía la fotografía al backend y completa el campo de placa.
+   */
+  recognizePlate(): void {
+    if (!this.imageBase64 || this.isRecognizingPlate()) {
+      return;
+    }
+
+    this.errorMessage.set('');
+    this.recognitionMessage.set('');
+    this.isRecognizingPlate.set(true);
+
+    const payload: PlateRecognitionRequest = {
+      image_base64: this.imageBase64,
+      mime_type: this.imageMimeType
+    };
+
+    this.parkingService
+      .recognizePlate(payload)
+      .pipe(
+        finalize(() => {
+          this.isRecognizingPlate.set(false);
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          const recognizedPlate = this.normalizePlate(
+            response.data.vehicle_plate
+          );
+
+          this.checkInForm.patchValue({
+            vehicle_plate: recognizedPlate
+          });
+
+          this.plateControl.markAsTouched();
+          this.plateControl.updateValueAndValidity();
+
+          this.recognitionMessage.set(
+            `Gemini reconoció la placa ${recognizedPlate}. Verifique el dato antes de registrar.`
+          );
+        },
+        error: (error: HttpErrorResponse) => {
+          this.errorMessage.set(
+            this.getApiErrorMessage(
+              error,
+              'No fue posible reconocer la placa en la fotografía.'
+            )
+          );
+        }
+      });
   }
 
   /**
@@ -158,12 +279,17 @@ export class VehicleEntryPage {
             vehicle_plate: '',
             vehicle_type: 'carro'
           });
+
+          this.resetCapturedPhoto();
         },
 
         error: (error: HttpErrorResponse) => {
 
           this.errorMessage.set(
-            this.getApiErrorMessage(error)
+            this.getApiErrorMessage(
+              error,
+              'No fue posible registrar el ingreso del vehículo.'
+            )
           );
         }
       });
@@ -179,7 +305,10 @@ export class VehicleEntryPage {
   /**
    * Obtiene el mensaje enviado por el backend.
    */
-  private getApiErrorMessage(error: HttpErrorResponse): string {
+  private getApiErrorMessage(
+    error: HttpErrorResponse,
+    fallbackMessage: string
+  ): string {
 
     const apiError = error.error as ApiErrorResponse | undefined;
 
@@ -194,7 +323,36 @@ export class VehicleEntryPage {
       return apiError.message;
     }
 
-    return 'No fue posible registrar el ingreso del vehículo.';
+    return fallbackMessage;
+  }
+
+  private getImageMimeType(format: string): SupportedImageMimeType {
+    const normalizedFormat = format.toLowerCase();
+
+    if (normalizedFormat === 'png') {
+      return 'image/png';
+    }
+
+    if (normalizedFormat === 'webp') {
+      return 'image/webp';
+    }
+
+    return 'image/jpeg';
+  }
+
+  private wasCameraCancelled(error: unknown): boolean {
+    const message = error instanceof Error
+      ? error.message.toLowerCase()
+      : String(error).toLowerCase();
+
+    return message.includes('cancel');
+  }
+
+  private resetCapturedPhoto(): void {
+    this.imageBase64 = '';
+    this.imageMimeType = 'image/jpeg';
+    this.plateImagePreview.set('');
+    this.recognitionMessage.set('');
   }
 
   /**

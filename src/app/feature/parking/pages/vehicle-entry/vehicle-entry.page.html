@@ -25,8 +25,76 @@
       <ion-card-content>
 
         <p class="description">
-          Digite la placa y seleccione el tipo de vehículo.
+          Tome una fotografía de la placa, permita que Gemini la lea y
+          verifique el resultado antes de registrar el ingreso.
         </p>
+
+        <section
+          class="camera-section"
+          aria-labelledby="camera-section-title"
+        >
+
+          <h2 id="camera-section-title">
+            1. Fotografiar la placa
+          </h2>
+
+          <ion-button
+            type="button"
+            expand="block"
+            fill="outline"
+            [disabled]="isTakingPhoto() || isRecognizingPlate() || isSubmitting()"
+            (click)="takePlatePhoto()"
+          >
+            @if (isTakingPhoto()) {
+              <span class="button-content">
+                <ion-spinner name="crescent"></ion-spinner>
+                Abriendo cámara...
+              </span>
+            } @else if (plateImagePreview()) {
+              Tomar otra fotografía
+            } @else {
+              Tomar fotografía
+            }
+          </ion-button>
+
+          @if (plateImagePreview(); as preview) {
+
+            <figure class="photo-preview">
+              <img
+                [src]="preview"
+                alt="Vista previa de la placa capturada"
+              >
+            </figure>
+
+            <ion-button
+              type="button"
+              expand="block"
+              [disabled]="isRecognizingPlate() || isSubmitting()"
+              (click)="recognizePlate()"
+            >
+              @if (isRecognizingPlate()) {
+                <span class="button-content">
+                  <ion-spinner name="crescent"></ion-spinner>
+                  Leyendo placa...
+                </span>
+              } @else {
+                Leer placa con Gemini
+              }
+            </ion-button>
+
+          }
+
+          @if (recognitionMessage()) {
+            <ion-note
+              color="success"
+              class="recognition-message"
+              role="status"
+            >
+              {{ recognitionMessage() }}
+            </ion-note>
+          }
+
+        </section>
 
         <form
           [formGroup]="checkInForm"
@@ -34,6 +102,10 @@
         >
 
           <ion-list lines="full">
+
+            <h2 class="form-section-title">
+              2. Verificar y registrar
+            </h2>
 
             <ion-item>
               <ion-input
@@ -135,7 +207,7 @@
       >
         <ion-card-header>
           <ion-card-title>
-            No fue posible registrar
+            No fue posible completar la operación
           </ion-card-title>
         </ion-card-header>
 
